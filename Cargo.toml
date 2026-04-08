@@ -1,0 +1,54 @@
+[package]
+name = "resource_monitor"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[[bin]]
+name = "rscmon"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = { version = "0.29", features = ["crossterm"] }
+crossterm = { version = "0.28", features = ["event-stream"] }
+sysinfo = { version = "0.32", default-features = false, features = ["system", "component", "disk"] }
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
+nvml-wrapper = { version = "0.10", optional = true }
+log = "0.4"
+env_logger = "0.11"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_System_Performance",
+    "Win32_System_SystemInformation",
+    "Win32_System_Power",
+    "Win32_System_Time",
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_System_Wmi",
+    "Win32_System_ProcessStatus",
+    "Win32_Security",
+    "Win32_System_Registry",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Ioctl",
+] }
+wmi = { version = "0.14", features = [] }
+
+[features]
+default = ["nvidia"]
+nvidia = ["nvml-wrapper"]
+# Build without the requireAdministrator UAC manifest — useful for cargo test
+test-no-uac = []
+
+[build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
